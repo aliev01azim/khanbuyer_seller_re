@@ -75,3 +75,37 @@ class CustomButton extends StatelessWidget {
     );
   }
 }
+
+class CustomButtonForDialog extends StatelessWidget {
+  final bool loading;
+  final Widget child;
+  final Function onPressed;
+  final double? width;
+  final double height;
+  final ButtonStyle? buttonStyle;
+  final bool disabled;
+
+  const CustomButtonForDialog({
+    Key? key,
+    required this.child,
+    required this.onPressed,
+    this.buttonStyle,
+    this.loading = false,
+    this.width,
+    this.height = 48,
+    this.disabled = false,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      height: height,
+      width: width,
+      child: TextButton(
+        style: disabled ? disabledStyle : buttonStyle,
+        child: loading ? const Indicator() : child,
+        onPressed: (disabled || loading) ? null : () => onPressed(),
+      ),
+    );
+  }
+}

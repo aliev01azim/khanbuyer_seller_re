@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:khanbuer_seller_re/helpers/api_services.dart';
+
+import '../helpers/api_services.dart';
 
 class CustomImage extends StatelessWidget {
   final String url;
@@ -32,7 +33,6 @@ class CustomImage extends StatelessWidget {
         Widget child,
         ImageChunkEvent? loadingProgress,
       ) {
-        // ignore: unnecessary_null_comparison
         if (loadingProgress == null) return child;
         return SizedBox(
           height: height,

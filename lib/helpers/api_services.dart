@@ -33,7 +33,6 @@ Future<bool> checkConnection() async {
       if (result.isNotEmpty && result[0].rawAddress.isNotEmpty) {
         return true;
       }
-
       throw ('Нет интернет соединения');
     }
     return true;
@@ -44,10 +43,8 @@ Future<bool> checkConnection() async {
 
 Future loginApi(String email, String password) async {
   await checkConnection();
-
   final String basicAuth =
       'Basic ' + base64Encode(utf8.encode('$email:$password'));
-
   return dio.post(
     '/api/users/login',
     options: Options(headers: {'Authorization': basicAuth}),
@@ -64,7 +61,6 @@ Future registerApi(String number) async {
 
 Future requestRecoveryMessageApi(String email) async {
   await checkConnection();
-
   return dio.post(
     '/api/user/request-recovery-message',
     data: {'email': email},
@@ -73,7 +69,6 @@ Future requestRecoveryMessageApi(String email) async {
 
 Future checkConfirmationCodeApi(String code) async {
   await checkConnection();
-
   return dio2.post(
     '/api/user/check-confirmation-code',
     data: {'code': code},
@@ -82,7 +77,6 @@ Future checkConfirmationCodeApi(String code) async {
 
 Future editAccountApi(data) async {
   await checkConnection();
-
   return dio.post(
     '/api/user/settings',
     data: data,
@@ -91,7 +85,6 @@ Future editAccountApi(data) async {
 
 Future resetPasswordApi(String code, String password) async {
   await checkConnection();
-
   return dio.post(
     '/api/user/reset-password',
     data: {'code': code, 'password': password},
@@ -100,7 +93,6 @@ Future resetPasswordApi(String code, String password) async {
 
 Future addAddressApi(data) async {
   await checkConnection();
-
   return dio.post(
     '/api/user-address/add',
     data: data,
@@ -109,7 +101,6 @@ Future addAddressApi(data) async {
 
 Future deleteAddressApi(data) async {
   await checkConnection();
-
   return dio.post(
     '/api/user-address/remove',
     data: data,
@@ -118,7 +109,6 @@ Future deleteAddressApi(data) async {
 
 Future editShopApi(data) async {
   await checkConnection();
-
   return dio.post(
     '/api/user-shop/edit',
     data: data,
@@ -127,9 +117,16 @@ Future editShopApi(data) async {
 
 Future addProductApi(data) async {
   await checkConnection();
-
   return dio.post(
     '/api/seller-products/add',
+    data: data,
+  );
+}
+
+Future editProductApi(data) async {
+  await checkConnection();
+  return dio.post(
+    '/api/seller-products/edit',
     data: data,
   );
 }
@@ -142,36 +139,41 @@ Future removeProductApi(data) async {
   );
 }
 
-Future addColorApi(Map<String, dynamic> params) async {
+Future addColorApi(data) async {
+  await checkConnection();
   return dio.post(
-    '/api/color/add',
-    queryParameters: params,
+    '/api/seller-products/add-color',
+    data: data,
   );
 }
 
-Future getSellerShopsApi() async {
-  return dio.get(
-    '/api/shops?ShopSearch[user_id]=${user['id']}',
-  );
-}
-
-Future getBrandsApi() async {
-  return dio.get('/api/brands/list');
-}
-
-Future getProductsApi(String filter) async {
+Future editColorApi(data) async {
   await checkConnection();
-  final role =
-      user['roles'].containsKey(Roles.customer) ? 'seller' : 'customer';
-  return dio.get(
-    '/api/$role-products?$filter',
+  return dio.post(
+    '/api/seller-products/edit-color',
+    data: data,
   );
 }
 
-Future getCustomerShopsApi() async {
+Future removeColorApi(data) async {
+  await checkConnection();
+  return dio.post(
+    '/api/seller-products/remove-color',
+    data: data,
+  );
+}
+
+Future getProductsApi() async {
   await checkConnection();
   return dio.get(
-    '/api/customer-shops?expand=shop.pictures',
+    '/api/seller-products',
+  );
+}
+
+Future getProductApi(dynamic id) async {
+  await checkConnection();
+  return dio.get(
+    '/api/seller-products/$id',
   );
 }
 
@@ -181,32 +183,34 @@ Future getCategoriesApi() async {
   );
 }
 
-Future getColorsApi() async {
+Future getSeasonsApi() async {
   return dio.get(
-    '/api/colors/list',
+    '/api/seasons/list',
   );
 }
 
-Future addToFavoritesApi(int id) async {
-  await checkConnection();
-
-  return dio.post(
-    '/api/user-favorite-products/add?product_id=$id',
-  );
-}
-
-Future getFavoritesApi() async {
-  await checkConnection();
-
+Future getGendersApi() async {
   return dio.get(
-    '/api/user-favorite-products/list',
+    '/api/genders/list',
   );
 }
 
-Future removeFavoriteApi(int id) async {
-  await checkConnection();
+Future getSizesTypesApi() async {
+  return dio.get(
+    '/api/size-types/list',
+  );
+}
 
+Future setImageAsMainApi(data) async {
   return dio.post(
-    '/api/user-favorite-products/remove?product_id=$id',
+    '/api/seller-products/set-color-image-as-main',
+    data: data,
+  );
+}
+
+Future removeColorImageApi(data) async {
+  return dio.post(
+    '/api/seller-products/remove-color-image',
+    data: data,
   );
 }

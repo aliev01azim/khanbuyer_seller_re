@@ -1,21 +1,30 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:khanbuer_seller_re/controllers/add_product_controller.dart';
+import 'package:khanbuer_seller_re/controllers/products_controller.dart';
 
 import 'sub_3.dart';
 
 class SubCategories2 extends StatelessWidget {
-  SubCategories2(this.parent, {Key? key}) : super(key: key);
-  final dynamic parent;
-  final _controller = Get.find<AddProductController>();
+  SubCategories2(
+      {Key? key,
+      required this.data,
+      required this.categories,
+      required this.onChange,
+      required this.onChanged})
+      : super(key: key);
+  final dynamic data;
+  final List categories;
+  final Function onChange;
+  final Function onChanged;
+  final _controller = Get.find<ProductsController>();
   @override
   Widget build(BuildContext context) {
     final _subCategories = _controller.categories
-        .where((element) => element['parent_id'] == parent['id'])
+        .where((element) => element['parent_id'] == data['id'])
         .toList();
     return Scaffold(
       appBar: AppBar(
-        title: Text(parent['title']),
+        title: Text(data['title']),
       ),
       body: Padding(
         padding: const EdgeInsets.all(8),
@@ -29,11 +38,15 @@ class SubCategories2 extends StatelessWidget {
                     .where((element) =>
                         element['parent_id'] == _subCategories[index]['id'])
                     .toList();
-                _controller.addCategoryValue(_subCategories[index]);
+                onChange(_subCategories[index]);
                 if (children.isNotEmpty) {
                   await Get.to(
                     () => SubCategories3(
-                        _subCategories[index]['title'], children),
+                        data: _subCategories[index]['title'],
+                        children: children,
+                        categories: categories,
+                        onChange: onChange,
+                        onChanged: onChanged),
                   );
                 } else {
                   Get.close(2);

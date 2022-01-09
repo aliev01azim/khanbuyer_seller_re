@@ -58,7 +58,7 @@ class _OptionsState extends State<Options> {
         horizontal: 12,
         vertical: 15,
       ),
-      decoration: BoxDecoration(
+      decoration: const BoxDecoration(
         color: Colors.white,
         boxShadow: [
           BoxShadow(
@@ -73,12 +73,12 @@ class _OptionsState extends State<Options> {
         children: [
           Text(
             widget.title,
-            style: TextStyle(
+            style: const TextStyle(
               fontSize: 14,
               fontWeight: FontWeight.w500,
             ),
           ),
-          SizedBox(height: 12),
+          const SizedBox(height: 12),
           Wrap(
             spacing: 10,
             runSpacing: 10,

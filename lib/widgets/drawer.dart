@@ -39,7 +39,7 @@ class AppDrawer extends StatelessWidget {
                 text: 'Мой магазин',
                 onTap: () => Get.off(
                   () => MyShopScreen(),
-                  binding: MyShopBinding(),
+                  binding: ProductsBinding(),
                 ),
               ),
               _createDrawerItem(
@@ -51,12 +51,12 @@ class AppDrawer extends StatelessWidget {
                   icon: Icons.thumbs_up_down_outlined,
                   text: 'Мои поставщики',
                   onTap: () {}),
-              _createDrawerItem(
-                icon: Icons.grid_view_outlined,
-                text: 'Каталог всех поставщиков',
-                onTap: () => Get.off(() => const ShopsProductsScreen(),
-                    binding: ShopsProductsBinding()),
-              ),
+              // _createDrawerItem(
+              //   icon: Icons.grid_view_outlined,
+              //   text: 'Каталог всех поставщиков',
+              //   onTap: () => Get.off(() => const ShopsProductsScreen(),
+              //       binding: ShopsProductsBinding()),
+              // ),
               _createDrawerItem(
                   icon: Icons.favorite_border,
                   text: 'Избранные товары',
@@ -72,11 +72,11 @@ class AppDrawer extends StatelessWidget {
                   value: 2),
               _createDrawerItem(
                   icon: Icons.paid_outlined, text: 'Финансы', onTap: () {}),
-              _createDrawerItem(
-                  icon: Icons.settings,
-                  text: 'Настройки',
-                  onTap: () => Get.to(() => const ShopsProductsScreen(),
-                      binding: ShopsProductsBinding())),
+              // _createDrawerItem(
+              //     icon: Icons.settings,
+              //     text: 'Настройки',
+              //     onTap: () => Get.to(() => const ShopsProductsScreen(),
+              //         binding: ShopsProductsBinding())),
               const SizedBox(
                 height: 30,
               ),

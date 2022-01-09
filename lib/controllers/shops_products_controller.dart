@@ -80,7 +80,7 @@ class ShopsProductsController extends GetxController {
     params = params.join('&');
 
     try {
-      dio.Response response = await getProductsApi(params);
+      dio.Response response = await getProductsApi();
       final result = response.data;
       if (loadMore) {
         if (_products[_products.length - 1]['id'] !=
@@ -134,19 +134,6 @@ class ShopsProductsController extends GetxController {
     update();
 
     getProducts(filter: true);
-  }
-
-  Future<void> getShops() async {
-    dio.Response response = await getCustomerShopsApi();
-    List shops = response.data
-        .where((s) => s['status'] == 1)
-        .map((shop) => {
-              'id': shop['shop']['id'],
-              'title': shop['shop']['name'],
-            })
-        .toList();
-    _shops = shops;
-    print('shops : $_shops');
   }
 
   Future<void> getCategories() async {

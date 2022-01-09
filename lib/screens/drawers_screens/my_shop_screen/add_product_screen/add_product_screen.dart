@@ -5,12 +5,12 @@ import 'package:dio/dio.dart' as dio;
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:get/instance_manager.dart';
-import 'package:khanbuer_seller_re/controllers/add_product_controller.dart';
+import 'package:khanbuer_seller_re/controllers/products_controller.dart';
 import 'package:khanbuer_seller_re/helpers/alerts.dart';
 import 'package:khanbuer_seller_re/helpers/colors.dart';
 import 'package:khanbuer_seller_re/helpers/validators.dart';
+import 'package:khanbuer_seller_re/screens/drawers_screens/my_shop_screen/widgets/category_picker.dart';
 import 'package:khanbuer_seller_re/widgets/custom_button.dart';
-import 'subScreens/sub_categories/sub_1.dart';
 
 InputDecoration inputDecoration = InputDecoration(
   enabledBorder: UnderlineInputBorder(
@@ -29,8 +29,7 @@ InputDecoration inputDecoration = InputDecoration(
 );
 
 TextStyle textStyle = const TextStyle(
-  fontSize: 12,
-  fontWeight: FontWeight.w300,
+  fontSize: 16,
 );
 
 class AddProductScreen extends StatefulWidget {
@@ -41,12 +40,21 @@ class AddProductScreen extends StatefulWidget {
 }
 
 class _AddProductFormState extends State<AddProductScreen> {
-  final _controller = Get.find<AddProductController>();
+  final _controller = Get.find<ProductsController>();
+  List _categories = [];
+  final List<String> _categoryTitles = [];
 
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _descriptionController = TextEditingController();
 
   final FocusNode _descriptionFocusNode = FocusNode();
+  @override
+  void dispose() {
+    _nameController.dispose();
+    _descriptionController.dispose();
+    _descriptionFocusNode.dispose();
+    super.dispose();
+  }
 
   void _handleSubmit() async {
     if (_formKey.currentState!.validate()) {
@@ -58,17 +66,16 @@ class _AddProductFormState extends State<AddProductScreen> {
       if (_descriptionController.text.isEmpty) {
         errors.add('Описание');
       }
-      if (_controller.categoryValues.isEmpty) {
+      if (_categories.isEmpty) {
         errors.add('Категория');
       }
       if (errors.isNotEmpty) {
         return warningAlert('Необходимо заполнить поля: ${errors.join(', ')}');
       }
-
       dio.FormData formData = dio.FormData.fromMap({
         'title': _nameController.text,
         'description': _descriptionController.text,
-        'category_ids': _controller.categoryValues.last['id'].toString(),
+        'category_ids': _categories.last['id'].toString(),
       });
       await _controller.addProduct(
         formData,
@@ -94,22 +101,11 @@ class _AddProductFormState extends State<AddProductScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                const SizedBox(height: 20),
-                const Text(
-                  'Категория',
-                  style: TextStyle(
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-                GetBuilder<AddProductController>(
-                  builder: (_) {
-                    return ListTile(
-                      contentPadding: const EdgeInsets.only(right: 0),
-                      title: Text(_.categoryTitles),
-                      trailing: const Icon(Icons.keyboard_arrow_right_outlined),
-                      onTap: () => Get.to(() => SubCategories1()),
-                    );
-                  },
+                const SizedBox(height: 15),
+                CategoryTile(
+                  categories: _categories,
+                  categoryTitles: _categoryTitles,
+                  onChanged: (value) => _categories = value,
                 ),
                 Container(
                   width: double.infinity,
@@ -156,10 +152,9 @@ class _AddProductFormState extends State<AddProductScreen> {
                     bottom: 28,
                   ),
                   width: double.infinity,
-                  child: GetBuilder<AddProductController>(
+                  child: GetBuilder<ProductsController>(
                     builder: (_) {
-                      final bool loading =
-                          _.addProductStatus == AddProductStatus.Loading;
+                      final bool loading = _.status == AddProductStatus.Loading;
                       return CustomButton(
                         height: 56,
                         loading: loading,

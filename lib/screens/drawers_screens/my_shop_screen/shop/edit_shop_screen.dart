@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:khanbuer_seller_re/controllers/my_shop_controller.dart';
+import 'package:khanbuer_seller_re/controllers/products_controller.dart';
 import 'package:khanbuer_seller_re/helpers/user_session.dart';
 import 'package:khanbuer_seller_re/helpers/validators.dart';
 import 'package:khanbuer_seller_re/widgets/custom_button.dart';
-import 'package:khanbuer_seller_re/widgets/custom_text_field.dart';
 
 class EditShopScreen extends StatefulWidget {
   const EditShopScreen({Key? key}) : super(key: key);
@@ -17,8 +16,11 @@ class _EditShopScreenState extends State<EditShopScreen> {
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   final FocusNode _titleFocusNode = FocusNode();
   final FocusNode _descriptionFocusNode = FocusNode();
+
   final TextEditingController _titleController = TextEditingController();
   final TextEditingController _descriptionController = TextEditingController();
+
+  bool isNotEdited = true;
   @override
   void initState() {
     _titleController.value =
@@ -43,7 +45,7 @@ class _EditShopScreenState extends State<EditShopScreen> {
         'title': _titleController.text.trim(),
         'description': _descriptionController.text.trim(),
       };
-      Get.find<MyShopController>().editShop(data);
+      Get.find<ProductsController>().editShop(data);
     }
   }
 
@@ -59,7 +61,7 @@ class _EditShopScreenState extends State<EditShopScreen> {
           key: _formKey,
           child: Column(
             children: [
-              CustomTextField(
+              TextFormField(
                 controller: _titleController,
                 validator: requiredValidation,
                 keyboardType: TextInputType.text,
@@ -70,9 +72,18 @@ class _EditShopScreenState extends State<EditShopScreen> {
                 decoration: const InputDecoration(
                   labelText: 'Название магазина',
                 ),
+                onChanged: (String val) {
+                  setState(() {
+                    if (val != user['shop']['title']) {
+                      isNotEdited = false;
+                    } else {
+                      isNotEdited = true;
+                    }
+                  });
+                },
               ),
               const SizedBox(height: 15),
-              CustomTextField(
+              TextFormField(
                 controller: _descriptionController,
                 validator: requiredValidation,
                 keyboardType: TextInputType.text,
@@ -80,16 +91,25 @@ class _EditShopScreenState extends State<EditShopScreen> {
                 decoration: const InputDecoration(
                   labelText: 'Описание магазина',
                 ),
+                onChanged: (String val) {
+                  setState(() {
+                    if (val != user['shop']['description']) {
+                      isNotEdited = false;
+                    } else {
+                      isNotEdited = true;
+                    }
+                  });
+                },
               ),
               const SizedBox(height: 30),
-              GetBuilder<MyShopController>(
+              GetBuilder<ProductsController>(
                 builder: (_) {
                   final bool loading =
                       _.shopEditStatus == ShopEditStatus.Loading;
                   return CustomButton(
                     loading: loading,
                     width: double.infinity,
-                    onPressed: () => _handleSubmit,
+                    onPressed: isNotEdited ? () {} : () => _handleSubmit,
                     child: const Text('Изменить'),
                     buttonStyle: ButtonStyle(
                       shape: MaterialStateProperty.all(
