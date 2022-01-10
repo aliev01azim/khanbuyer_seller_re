@@ -160,9 +160,9 @@ class AuthController extends GetxController {
         await u.sessionSaveUser(result['user']);
         status = UserStatus.IsAuthenticated;
         if (!result['user']['roles'].containsKey(Roles.seller)) {
-          Get.off(() => BuyerScreen(), binding: AuthBinding());
+          Get.offAll(() => BuyerScreen(), binding: AuthBinding());
         } else {
-          Get.off(() => SellerScreen(), binding: AuthBinding());
+          Get.offAll(() => SellerScreen(), binding: AuthBinding());
         }
         code = cod;
       }

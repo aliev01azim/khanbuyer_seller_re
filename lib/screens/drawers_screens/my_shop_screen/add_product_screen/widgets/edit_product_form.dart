@@ -61,9 +61,12 @@ class _EditProductFormState extends State<EditProductForm> {
     _titleController.text = widget.product['title'];
     _descriptionController.text = widget.product['description'];
     _fabricStructureController.text = widget.product['material'] ?? '';
-    _sizesFromServer = widget.product['sizesString'] ?? '';
-    _seasonsFromServer = widget.product['seasonsString'] ?? '';
-    _gendersFromServer = widget.product['gendersString'] ?? '';
+    _sizesFromServer = widget.product['sizesString'];
+    _seasonsFromServer = widget.product['seasonsString'];
+    _gendersFromServer = widget.product['gendersString'];
+    _seasons = widget.product['seasons'];
+    _genders = widget.product['genders'];
+    _sizes = widget.product['sizes'];
     super.initState();
   }
 
