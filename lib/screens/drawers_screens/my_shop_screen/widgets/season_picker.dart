@@ -1,16 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:khanbuer_seller_re/controllers/products_controller.dart';
 
 class SeasonTile extends StatefulWidget {
   final List seasons;
-  final String seasonsFromServer;
+  final List allSeasons;
   final Function onChanged;
 
   const SeasonTile({
     Key? key,
     required this.seasons,
-    required this.seasonsFromServer,
+    required this.allSeasons,
     required this.onChanged,
   }) : super(key: key);
 
@@ -19,34 +18,33 @@ class SeasonTile extends StatefulWidget {
 }
 
 class _SeasonTileState extends State<SeasonTile> {
-  List seasons = [];
-  List textOfSeasons = [];
+  List _seasons = [];
+  late String textOfSeasons;
   @override
   void initState() {
-    seasons = widget.seasons;
+    _seasons = widget.seasons;
     super.initState();
   }
 
   @override
   Widget build(BuildContext context) {
-    if (seasons.isNotEmpty) {
-      seasons.sort((a, b) => a['id'].compareTo(b['id']));
-      textOfSeasons = seasons.map((e) => e['title']).toList();
+    if (_seasons.isNotEmpty) {
+      _seasons.sort((a, b) => a['id'].compareTo(b['id']));
+      textOfSeasons = _seasons.map((e) => e['title']).join(', ');
     }
     return ListTile(
       tileColor: Colors.white,
       onTap: () {
         Get.dialog(
           SeasonPicker(
-            seasons: seasons,
-            onChange: (value) {
-              setState(() {
-                if (value['isChosen']) {
-                  seasons.add(value);
-                } else {
-                  seasons.remove(value);
-                }
-              });
+            seasons: _seasons,
+            allSeasons: widget.allSeasons,
+            onChange: (List value) {
+              if (mounted) {
+                setState(() {
+                  _seasons = value;
+                });
+              }
             },
             onChanged: (value) => widget.onChanged(value),
           ),
@@ -62,11 +60,7 @@ class _SeasonTileState extends State<SeasonTile> {
       subtitle: Padding(
         padding: const EdgeInsets.only(top: 15),
         child: Text(
-          seasons.isEmpty
-              ? widget.seasonsFromServer.isEmpty
-                  ? 'Не выбрано'
-                  : widget.seasonsFromServer
-              : textOfSeasons.join(', '),
+          _seasons.isNotEmpty ? textOfSeasons : 'Не выбрано',
           style: const TextStyle(
             fontWeight: FontWeight.w300,
             fontSize: 12,
@@ -86,10 +80,11 @@ class SeasonPicker extends StatefulWidget {
   final List seasons;
   final Function onChange;
   final Function onChanged;
-
+  final List allSeasons;
   const SeasonPicker({
     Key? key,
     required this.seasons,
+    required this.allSeasons,
     required this.onChange,
     required this.onChanged,
   }) : super(key: key);
@@ -99,37 +94,53 @@ class SeasonPicker extends StatefulWidget {
 }
 
 class _SeasonPickerState extends State<SeasonPicker> {
-  final values = Get.find<ProductsController>().seasons;
-  List seasons = [];
+  List _seasons = [];
   @override
   void initState() {
-    seasons = widget.seasons;
-    values.sort((a, b) => a['id'].compareTo(b['id']));
+    for (var element in widget.seasons) {
+      element.addAll({'isChosen': true});
+    }
+    _seasons = widget.seasons;
+    for (var _s in widget.allSeasons) {
+      if (_seasons.any((element) => element['id'] == _s['id'])) {
+        _s.addAll({'isChosen': true});
+      } else {
+        _s.addAll({'isChosen': false});
+      }
+    }
+    widget.allSeasons.sort((a, b) => a['id'].compareTo(b['id']));
     super.initState();
   }
 
   @override
   void dispose() {
-    widget.onChanged(seasons);
+    widget.onChanged(_seasons);
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Размеры')),
+      appBar: AppBar(title: const Text('Сезоны')),
       body: ListView.builder(
-        itemCount: values.length,
+        itemCount: widget.allSeasons.length,
         itemBuilder: (_, index) {
-          var size = values[index];
+          var season = widget.allSeasons[index];
           return CheckboxListTile(
-            title: Text(size['title']),
-            value: size['isChosen'] ?? false,
+            title: Text(season['title']),
+            value: season['isChosen'],
             onChanged: (bool? value) {
               setState(() {
-                size['isChosen'] = value!;
+                season['isChosen'] = value;
+                if (season['isChosen']) {
+                  _seasons.add(season);
+                } else {
+                  _seasons
+                      .removeWhere((element) => element['id'] == season['id']);
+                }
               });
-              widget.onChange(size);
+
+              widget.onChange(_seasons);
             },
           );
         },

@@ -3,15 +3,13 @@ import 'package:get/get.dart';
 
 class SizeTile extends StatefulWidget {
   final List sizes;
-  final String sizesFromServer;
-  final dynamic product;
+  final List allSizes;
   final Function onChanged;
 
   const SizeTile({
     Key? key,
     required this.sizes,
-    required this.sizesFromServer,
-    required this.product,
+    required this.allSizes,
     required this.onChanged,
   }) : super(key: key);
 
@@ -20,36 +18,33 @@ class SizeTile extends StatefulWidget {
 }
 
 class _SizeTileState extends State<SizeTile> {
-  List sizes = [];
-  List textOfSizes = [];
+  List _sizes = [];
+  late String _textOfSizes;
   @override
   void initState() {
-    sizes = widget.sizes;
-
+    _sizes = widget.sizes;
     super.initState();
   }
 
   @override
   Widget build(BuildContext context) {
-    if (sizes.isNotEmpty) {
-      sizes.sort((a, b) => a['id'].compareTo(b['id']));
-      textOfSizes = sizes.map((e) => e['title']).toList();
+    if (_sizes.isNotEmpty) {
+      _sizes.sort((a, b) => a['id'].compareTo(b['id']));
+      _textOfSizes = _sizes.map((e) => e['title']).join(', ');
     }
     return ListTile(
       tileColor: Colors.white,
       onTap: () {
         Get.dialog(
           SizePicker(
-            sizes: sizes,
-            product: widget.product,
+            sizes: _sizes,
+            allSizes: widget.allSizes,
             onChange: (value) {
-              setState(() {
-                if (value['isChosen']) {
-                  sizes.add(value);
-                } else {
-                  sizes.remove(value);
-                }
-              });
+              if (mounted) {
+                setState(() {
+                  _sizes = value;
+                });
+              }
             },
             onChanged: (value) => widget.onChanged(value),
           ),
@@ -65,11 +60,7 @@ class _SizeTileState extends State<SizeTile> {
       subtitle: Padding(
         padding: const EdgeInsets.only(top: 15),
         child: Text(
-          sizes.isEmpty
-              ? widget.sizesFromServer.isEmpty
-                  ? 'Не выбрано'
-                  : widget.sizesFromServer
-              : textOfSizes.join(', '),
+          _sizes.isNotEmpty ? _textOfSizes : 'Не выбрано',
           style: const TextStyle(
             fontWeight: FontWeight.w300,
             fontSize: 12,
@@ -87,14 +78,14 @@ class _SizeTileState extends State<SizeTile> {
 
 class SizePicker extends StatefulWidget {
   final List sizes;
+  final List allSizes;
   final Function onChange;
   final Function onChanged;
-  final dynamic product;
   const SizePicker({
     Key? key,
     required this.sizes,
+    required this.allSizes,
     required this.onChange,
-    required this.product,
     required this.onChanged,
   }) : super(key: key);
 
@@ -103,18 +94,27 @@ class SizePicker extends StatefulWidget {
 }
 
 class _SizePickerState extends State<SizePicker> {
-  List sizes = [];
+  List _sizes = [];
   @override
   void initState() {
-    sizes = widget.sizes;
-    (widget.product['category']['sizeTypes'][0]['sizes'] as List)
-        .sort((a, b) => a['id'].compareTo(b['id']));
+    for (var element in widget.sizes) {
+      element.addAll({'isChosen': true});
+    }
+    _sizes = widget.sizes;
+    for (var _s in widget.allSizes) {
+      if (_sizes.any((element) => element['id'] == _s['id'])) {
+        _s.addAll({'isChosen': true});
+      } else {
+        _s.addAll({'isChosen': false});
+      }
+    }
+    widget.allSizes.sort((a, b) => a['id'].compareTo(b['id']));
     super.initState();
   }
 
   @override
   void dispose() {
-    widget.onChanged(sizes);
+    widget.onChanged(_sizes);
     super.dispose();
   }
 
@@ -123,18 +123,23 @@ class _SizePickerState extends State<SizePicker> {
     return Scaffold(
       appBar: AppBar(title: const Text('Размеры')),
       body: ListView.builder(
-        itemCount: widget.product['category']['sizeTypes'][0]['sizes'].length,
+        itemCount: widget.allSizes.length,
         itemBuilder: (_, index) {
-          var size = widget.product['category']['sizeTypes'][0]['sizes'][index];
+          var size = widget.allSizes[index];
           return CheckboxListTile(
             title: Text(size['title']),
-            value: size['isChosen'] ?? false,
+            value: size['isChosen'],
             onChanged: (bool? value) {
               setState(() {
-                size['isChosen'] = value!;
+                size['isChosen'] = value;
+                if (size['isChosen']) {
+                  _sizes.add(size);
+                } else {
+                  _sizes.removeWhere((element) => element['id'] == size['id']);
+                }
               });
 
-              widget.onChange(size);
+              widget.onChange(_sizes);
             },
           );
         },

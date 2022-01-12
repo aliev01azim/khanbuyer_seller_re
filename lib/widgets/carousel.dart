@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:get/get.dart';
 import 'package:khanbuer_seller_re/controllers/products_controller.dart';
-import 'package:khanbuer_seller_re/screens/drawers_screens/my_shop_screen/add_product_screen/widgets/add_color_form.dart';
 import '../screens/drawers_screens/my_shop_screen/add_product_screen/widgets/view_picture_detail.dart';
 import 'app_indicator.dart';
 import 'custom_image.dart';
@@ -10,7 +9,13 @@ import 'custom_image.dart';
 class Carousel extends StatefulWidget {
   final dynamic product;
   final dynamic color;
-  const Carousel(this.product, this.color, {Key? key}) : super(key: key);
+  final Function setstate;
+  const Carousel({
+    Key? key,
+    required this.product,
+    required this.color,
+    required this.setstate,
+  }) : super(key: key);
 
   @override
   State<StatefulWidget> createState() {
@@ -43,23 +48,6 @@ class _CarouselState extends State<Carousel> {
               width: double.infinity,
               fit: BoxFit.contain,
             ),
-            // if (item['isMain'] == null && item['id'] == null)
-            //   Container(
-            //     alignment: Alignment.bottomCenter,
-            //     child: Material(
-            //       color: Colors.transparent,
-            //       child: ElevatedButton(
-            //         style: ButtonStyle(
-            //           backgroundColor: MaterialStateProperty.all(
-            //               const Color.fromARGB(137, 0, 119, 255)),
-            //         ),
-            //         child: const Text(
-            //           'Добавить фото',
-            //         ),
-            //         onPressed: () => Get.to(() => AddColorForm(widget.product)),
-            //       ),
-            //     ),
-            //   ),
             if (item['isMain'] != null || item['id'] != null)
               Container(
                 alignment: Alignment.bottomCenter,
@@ -82,6 +70,7 @@ class _CarouselState extends State<Carousel> {
                                     item['id'], widget.product, widget.color);
                                 if (value) {
                                   await _carouselController.animateToPage(0);
+                                  widget.setstate();
                                 }
                               },
                       );
@@ -114,7 +103,7 @@ class _CarouselState extends State<Carousel> {
                               if (value) {
                                 await _carouselController.nextPage();
                               }
-                              setState(() {});
+                              widget.setstate();
                             },
                             child: Container(
                               padding: const EdgeInsets.all(3),

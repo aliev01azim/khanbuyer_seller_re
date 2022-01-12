@@ -1,16 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:khanbuer_seller_re/controllers/products_controller.dart';
 
 class GenderTile extends StatefulWidget {
   final List genders;
-  final String gendersFromServer;
+  final List allGenders;
   final Function onChanged;
 
   const GenderTile({
     Key? key,
     required this.genders,
-    required this.gendersFromServer,
+    required this.allGenders,
     required this.onChanged,
   }) : super(key: key);
 
@@ -19,34 +18,33 @@ class GenderTile extends StatefulWidget {
 }
 
 class _GenderTileState extends State<GenderTile> {
-  List genders = [];
-  List textOfGenders = [];
+  List _genders = [];
+  late String textOfGenders;
   @override
   void initState() {
-    genders = widget.genders;
+    _genders = widget.genders;
     super.initState();
   }
 
   @override
   Widget build(BuildContext context) {
-    if (genders.isNotEmpty) {
-      genders.sort((a, b) => a['id'].compareTo(b['id']));
-      textOfGenders = genders.map((e) => e['title']).toList();
+    if (_genders.isNotEmpty) {
+      _genders.sort((a, b) => a['id'].compareTo(b['id']));
+      textOfGenders = _genders.map((e) => e['title']).join(', ');
     }
     return ListTile(
       tileColor: Colors.white,
       onTap: () {
         Get.dialog(
           GenderPicker(
-            genders: genders,
-            onChange: (value) {
-              setState(() {
-                if (value['isChosen']) {
-                  genders.add(value);
-                } else {
-                  genders.remove(value);
-                }
-              });
+            genders: _genders,
+            allGenders: widget.allGenders,
+            onChange: (List value) {
+              if (mounted) {
+                setState(() {
+                  _genders = value;
+                });
+              }
             },
             onChanged: (value) => widget.onChanged(value),
           ),
@@ -62,11 +60,7 @@ class _GenderTileState extends State<GenderTile> {
       subtitle: Padding(
         padding: const EdgeInsets.only(top: 15),
         child: Text(
-          genders.isEmpty
-              ? widget.gendersFromServer.isEmpty
-                  ? 'Не выбрано'
-                  : widget.gendersFromServer
-              : textOfGenders.join(', '),
+          _genders.isNotEmpty ? textOfGenders : 'Не выбрано',
           style: const TextStyle(
             fontWeight: FontWeight.w300,
             fontSize: 12,
@@ -84,12 +78,14 @@ class _GenderTileState extends State<GenderTile> {
 
 class GenderPicker extends StatefulWidget {
   final List genders;
+  final List allGenders;
   final Function onChange;
   final Function onChanged;
 
   const GenderPicker({
     Key? key,
     required this.genders,
+    required this.allGenders,
     required this.onChange,
     required this.onChanged,
   }) : super(key: key);
@@ -99,18 +95,27 @@ class GenderPicker extends StatefulWidget {
 }
 
 class _GenderPickerState extends State<GenderPicker> {
-  final values = Get.find<ProductsController>().genders;
-  List genders = [];
+  List _genders = [];
   @override
   void initState() {
-    genders = widget.genders;
-    values.sort((a, b) => a['id'].compareTo(b['id']));
+    for (var element in widget.genders) {
+      element.addAll({'isChosen': true});
+    }
+    _genders = widget.genders;
+    for (var _s in widget.allGenders) {
+      if (_genders.any((element) => element['id'] == _s['id'])) {
+        _s.addAll({'isChosen': true});
+      } else {
+        _s.addAll({'isChosen': false});
+      }
+    }
+    widget.allGenders.sort((a, b) => a['id'].compareTo(b['id']));
     super.initState();
   }
 
   @override
   void dispose() {
-    widget.onChanged(genders);
+    widget.onChanged(_genders);
     super.dispose();
   }
 
@@ -119,18 +124,23 @@ class _GenderPickerState extends State<GenderPicker> {
     return Scaffold(
       appBar: AppBar(title: const Text('Размеры')),
       body: ListView.builder(
-        itemCount: values.length,
+        itemCount: widget.allGenders.length,
         itemBuilder: (_, index) {
-          var size = values[index];
+          var gender = widget.allGenders[index];
           return CheckboxListTile(
-            title: Text(size['title']),
-            value: size['isChosen'] ?? false,
+            title: Text(gender['title']),
+            value: gender['isChosen'],
             onChanged: (bool? value) {
               setState(() {
-                size['isChosen'] = value!;
+                gender['isChosen'] = value;
+                if (gender['isChosen']) {
+                  _genders.add(gender);
+                } else {
+                  _genders
+                      .removeWhere((element) => element['id'] == gender['id']);
+                }
               });
-
-              widget.onChange(size);
+              widget.onChange(_genders);
             },
           );
         },

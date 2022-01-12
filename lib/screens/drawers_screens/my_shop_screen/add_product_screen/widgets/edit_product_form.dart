@@ -45,10 +45,6 @@ class _EditProductFormState extends State<EditProductForm> {
   List _genders = [];
   List _sizes = [];
 
-  String _sizesFromServer = '';
-  String _seasonsFromServer = '';
-  String _gendersFromServer = '';
-
   final TextEditingController _titleController = TextEditingController();
   final TextEditingController _descriptionController = TextEditingController();
   final TextEditingController _fabricStructureController =
@@ -61,9 +57,6 @@ class _EditProductFormState extends State<EditProductForm> {
     _titleController.text = widget.product['title'];
     _descriptionController.text = widget.product['description'];
     _fabricStructureController.text = widget.product['material'] ?? '';
-    _sizesFromServer = widget.product['sizesString'];
-    _seasonsFromServer = widget.product['seasonsString'];
-    _gendersFromServer = widget.product['gendersString'];
     _seasons = widget.product['seasons'];
     _genders = widget.product['genders'];
     _sizes = widget.product['sizes'];
@@ -216,8 +209,7 @@ class _EditProductFormState extends State<EditProductForm> {
                 ),
                 SizeTile(
                   sizes: _sizes,
-                  product: widget.product,
-                  sizesFromServer: _sizesFromServer,
+                  allSizes: widget.product['category']['sizeTypes'][0]['sizes'],
                   onChanged: (value) => _sizes = value,
                 ),
                 Container(
@@ -232,7 +224,7 @@ class _EditProductFormState extends State<EditProductForm> {
                 ),
                 SeasonTile(
                   seasons: _seasons,
-                  seasonsFromServer: _seasonsFromServer,
+                  allSeasons: _controller.seasons,
                   onChanged: (value) => _seasons = value,
                 ),
                 Container(
@@ -247,7 +239,7 @@ class _EditProductFormState extends State<EditProductForm> {
                 ),
                 GenderTile(
                   genders: _genders,
-                  gendersFromServer: _gendersFromServer,
+                  allGenders: _controller.genders,
                   onChanged: (value) => _genders = value,
                 ),
                 Container(
