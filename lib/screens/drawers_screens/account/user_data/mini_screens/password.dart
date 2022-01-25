@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:hive_flutter/hive_flutter.dart';
 import 'package:khanbuer_seller_re/controllers/auth_controller.dart';
 import 'package:khanbuer_seller_re/helpers/user_session.dart';
 import 'package:khanbuer_seller_re/widgets/custom_button.dart';
@@ -12,7 +13,16 @@ class Password extends StatefulWidget {
 }
 
 class _PasswordState extends State<Password> {
-  String data = user['full_name'] ?? '';
+  @override
+  void initState() {
+    if (user['full_name'] != null) {
+      data = user['full_name'];
+    }
+    super.initState();
+  }
+
+  Map user = Hive.box('userBox').get('user', defaultValue: {});
+  String data = '';
   @override
   Widget build(BuildContext context) {
     return Scaffold(

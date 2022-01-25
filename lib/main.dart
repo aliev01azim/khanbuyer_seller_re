@@ -3,9 +3,12 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:hive_flutter/hive_flutter.dart';
+import 'package:khanbuer_seller_re/controllers/products_controller.dart';
+import 'package:khanbuer_seller_re/helpers/user_session.dart';
 import 'package:path_provider/path_provider.dart';
 
 import 'controllers/all_bindings.dart';
+import 'controllers/orders_controller.dart';
 import 'screens/home_screen.dart';
 import 'screens/start_screens/slider_screen.dart';
 
@@ -13,7 +16,8 @@ Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Hive.initFlutter();
   await openHiveBox('userBox');
-
+  Get.put<ProductsController>(ProductsController());
+  Get.put<OrdersController>(OrdersController());
   runApp(const MyApp());
 }
 
@@ -49,9 +53,10 @@ Future<void> openHiveBox(String boxName, {bool limit = false}) async {
 
 class MyApp extends StatelessWidget {
   const MyApp({Key? key}) : super(key: key);
-  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
+    Map user = Hive.box('userBox').get('user', defaultValue: {});
+    print(user);
     return GetMaterialApp(
       title: 'Khunbuyer',
       theme: ThemeData(

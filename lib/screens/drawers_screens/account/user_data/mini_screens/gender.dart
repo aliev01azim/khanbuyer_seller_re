@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:hive_flutter/hive_flutter.dart';
 import 'package:khanbuer_seller_re/controllers/auth_controller.dart';
 import 'package:khanbuer_seller_re/helpers/user_session.dart';
 import 'package:khanbuer_seller_re/widgets/custom_button.dart';
@@ -14,6 +15,7 @@ class Gender extends StatefulWidget {
 class _GenderState extends State<Gender> {
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   final _authController = Get.find<AuthController>();
+  Map user = Hive.box('userBox').get('user', defaultValue: {});
   Future<void> _handleRequest() async {
     if (_selectedGender == _genders[0]) {
       _selectedGender = '2';

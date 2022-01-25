@@ -11,6 +11,7 @@ import 'package:khanbuer_seller_re/helpers/colors.dart';
 import 'package:khanbuer_seller_re/helpers/validators.dart';
 import 'package:khanbuer_seller_re/screens/drawers_screens/my_shop_screen/widgets/category_picker.dart';
 import 'package:khanbuer_seller_re/widgets/custom_button.dart';
+import 'package:khanbuer_seller_re/widgets/drawer.dart';
 
 InputDecoration inputDecoration = InputDecoration(
   enabledBorder: UnderlineInputBorder(
@@ -43,6 +44,7 @@ class _AddProductFormState extends State<AddProductScreen> {
   final _controller = Get.find<ProductsController>();
   List _categories = [];
   final List<String> _categoryTitles = [];
+  final args = Get.arguments;
 
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _descriptionController = TextEditingController();
@@ -79,6 +81,7 @@ class _AddProductFormState extends State<AddProductScreen> {
       });
       await _controller.addProduct(
         formData,
+        args['isDrawer'],
       );
     }
   }
@@ -92,6 +95,7 @@ class _AddProductFormState extends State<AddProductScreen> {
       appBar: AppBar(
         title: const Text('Добавление продукта'),
       ),
+      drawer: args['isDrawer'] ? const AppDrawer() : null,
       body: SingleChildScrollView(
         padding: const EdgeInsets.symmetric(horizontal: 8),
         child: Form(

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:hive_flutter/hive_flutter.dart';
 import 'package:khanbuer_seller_re/controllers/products_controller.dart';
 import 'package:khanbuer_seller_re/helpers/user_session.dart';
 import 'package:khanbuer_seller_re/helpers/validators.dart';
@@ -14,11 +15,12 @@ class EditShopScreen extends StatefulWidget {
 
 class _EditShopScreenState extends State<EditShopScreen> {
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
-  final FocusNode _titleFocusNode = FocusNode();
   final FocusNode _descriptionFocusNode = FocusNode();
 
   final TextEditingController _titleController = TextEditingController();
   final TextEditingController _descriptionController = TextEditingController();
+
+  Map user = Hive.box('userBox').get('user', defaultValue: {});
 
   bool isNotEdited = true;
   @override
@@ -33,7 +35,6 @@ class _EditShopScreenState extends State<EditShopScreen> {
   @override
   void dispose() {
     _titleController.dispose();
-    _titleFocusNode.dispose();
     _descriptionController.dispose();
     _descriptionFocusNode.dispose();
     super.dispose();
@@ -74,7 +75,7 @@ class _EditShopScreenState extends State<EditShopScreen> {
                 ),
                 onChanged: (String val) {
                   setState(() {
-                    if (val != user['shop']['title']) {
+                    if (val != user['shop']['title'] && val.isNotEmpty) {
                       isNotEdited = false;
                     } else {
                       isNotEdited = true;
@@ -91,9 +92,10 @@ class _EditShopScreenState extends State<EditShopScreen> {
                 decoration: const InputDecoration(
                   labelText: 'Описание магазина',
                 ),
+                focusNode: _descriptionFocusNode,
                 onChanged: (String val) {
                   setState(() {
-                    if (val != user['shop']['description']) {
+                    if (val != user['shop']['description'] && val.isNotEmpty) {
                       isNotEdited = false;
                     } else {
                       isNotEdited = true;

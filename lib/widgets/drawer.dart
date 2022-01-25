@@ -1,18 +1,22 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:hive_flutter/hive_flutter.dart';
 import 'package:khanbuer_seller_re/controllers/all_bindings.dart';
-import 'package:khanbuer_seller_re/helpers/user_session.dart';
 import 'package:khanbuer_seller_re/screens/drawers_screens/account/account.dart';
 import 'package:khanbuer_seller_re/screens/drawers_screens/my_shop_screen/my_shop_screen.dart';
-import 'package:khanbuer_seller_re/screens/drawers_screens/shops_products_screen/shops_products_screen.dart';
+import 'package:khanbuer_seller_re/screens/start_screens/slider_screen.dart';
 
+import '../screens/drawers_screens/my_shop_screen/add_product_screen/add_product_screen.dart';
+import '../screens/drawers_screens/orders_screen/orders_screen.dart';
 import 'logo.dart';
 
+// ignore: must_be_immutable
 class AppDrawer extends StatelessWidget {
   const AppDrawer({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
+    Map user = Hive.box('userBox').get('user', defaultValue: {});
     return Drawer(
       child: SizedBox(
         height: MediaQuery.of(context).size.height,
@@ -25,63 +29,61 @@ class AppDrawer extends StatelessWidget {
               ),
               const LogoWidget(),
               const SizedBox(
-                height: 35,
+                height: 15,
               ),
               _createDrawerItem(
                 icon: Icons.account_circle,
-                text: user['email'] ??
-                    user['unconfirmed_email'] ??
-                    'buyer@gmail.com',
-                onTap: () => Get.off(() => Account()),
+                text: user['email'].isNotEmpty
+                    ? user['email']
+                    : user['unconfirmed_email'] ?? 'seller@gmail.com',
+                onTap: () => Get.offAll(() => Account()),
+              ),
+              _createDrawerItem(
+                icon: Icons.hail_outlined,
+                text: 'Покупатели',
+                onTap: () {},
               ),
               _createDrawerItem(
                 icon: Icons.shop,
                 text: 'Мой магазин',
-                onTap: () => Get.off(
-                  () => MyShopScreen(),
-                  binding: ProductsBinding(),
-                ),
+                onTap: () => Get.offAll(() => MyShopScreen()),
               ),
               _createDrawerItem(
                 icon: Icons.add_circle_outline,
-                text: 'Добавить поставщика',
+                text: 'Добавить товар',
+                onTap: () => Get.offAll(() => const AddProductScreen(),
+                    arguments: {'isDrawer': true}),
+              ),
+              _createDrawerItem(
+                icon: Icons.task_alt_outlined,
+                text: 'Задачи',
                 onTap: () {},
               ),
               _createDrawerItem(
-                  icon: Icons.thumbs_up_down_outlined,
-                  text: 'Мои поставщики',
-                  onTap: () {}),
-              // _createDrawerItem(
-              //   icon: Icons.grid_view_outlined,
-              //   text: 'Каталог всех поставщиков',
-              //   onTap: () => Get.off(() => const ShopsProductsScreen(),
-              //       binding: ShopsProductsBinding()),
-              // ),
+                icon: Icons.grading_outlined,
+                text: 'Заказы',
+                onTap: () => Get.offAll(() => OrdersScreen()),
+              ),
               _createDrawerItem(
-                  icon: Icons.favorite_border,
-                  text: 'Избранные товары',
-                  onTap: () {}),
+                icon: Icons.paid_outlined,
+                text: 'Финансы',
+                onTap: () {},
+              ),
               _createDrawerItem(
-                  icon: Icons.grading_outlined,
-                  text: 'Мои заказы',
-                  onTap: () {}),
-              _cartDrawerItem(
-                  icon: Icons.shopping_cart_outlined,
-                  text: 'Корзина',
-                  onTap: () {},
-                  value: 2),
-              _createDrawerItem(
-                  icon: Icons.paid_outlined, text: 'Финансы', onTap: () {}),
-              // _createDrawerItem(
-              //     icon: Icons.settings,
-              //     text: 'Настройки',
-              //     onTap: () => Get.to(() => const ShopsProductsScreen(),
-              //         binding: ShopsProductsBinding())),
+                icon: Icons.settings,
+                text: 'Настройки',
+                onTap: () {},
+              ),
               const SizedBox(
                 height: 30,
               ),
               _createDrawerItem(
-                  icon: Icons.logout_outlined, text: 'Выход', onTap: () {}),
+                  icon: Icons.logout_outlined,
+                  text: 'Выход',
+                  onTap: () async {
+                    await Hive.box('userBox').deleteFromDisk();
+                    Get.offAll(const StartScreen());
+                  }),
             ],
           ),
         ),

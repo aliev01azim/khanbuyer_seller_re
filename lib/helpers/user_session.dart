@@ -3,7 +3,6 @@ import 'dart:io';
 import 'package:hive/hive.dart';
 import 'package:path_provider/path_provider.dart';
 
-Map user = Hive.box('userBox').get('user', defaultValue: {});
 // Future<void> sessionSavePartOfBox(
 //     String boxName, String key, dynamic data) async {
 //   if (!await Hive.boxExists(boxName)) {

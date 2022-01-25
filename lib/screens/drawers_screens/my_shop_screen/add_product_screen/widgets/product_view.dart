@@ -75,15 +75,18 @@ class _ProductScreenState extends State<ProductScreen> {
                       fit: BoxFit.contain,
                     ),
                   ],
-                  ProductRow(
-                    title: '${widget.product['colors'][index]['price']} руб',
-                    style: const TextStyle(
-                        fontSize: 20, fontWeight: FontWeight.bold),
-                  ),
-                  ProductRow(
-                    title: 'Цвет : ${widget.product['colors'][index]['title']}',
-                    style: const TextStyle(fontSize: 15, color: Colors.grey),
-                  ),
+                  if (widget.product['colors'].isNotEmpty)
+                    ProductRow(
+                      title: '${widget.product['colors'][index]['price']} руб',
+                      style: const TextStyle(
+                          fontSize: 20, fontWeight: FontWeight.bold),
+                    ),
+                  if (widget.product['colors'].isNotEmpty)
+                    ProductRow(
+                      title:
+                          'Цвет : ${widget.product['colors'][index]['title']}',
+                      style: const TextStyle(fontSize: 15, color: Colors.grey),
+                    ),
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 20),
                     child: Row(
@@ -111,14 +114,17 @@ class _ProductScreenState extends State<ProductScreen> {
                   ProductRow(
                     title: 'Пол : ${widget.product['gendersString']}',
                   ),
-                  ProductRow(
+                  if (widget.product['colors'].isNotEmpty)
+                    ProductRow(
+                        title:
+                            'Код продукта: ${widget.product['colors'][index]['item_code']}'),
+                  if (widget.product['colors'].isNotEmpty)
+                    ProductRow(
                       title:
-                          'Код продукта: ${widget.product['colors'][index]['item_code']}'),
-                  ProductRow(
-                    title:
-                        'В наличии: ${widget.product['colors'][index]['inStockTitle']}',
-                  ),
-                  if (widget.product['colors'][index].containsKey('id')) ...[
+                          'В наличии: ${widget.product['colors'][index]['inStockTitle']}',
+                    ),
+                  if (widget.product['colors'].isNotEmpty &&
+                      widget.product['colors'][index].containsKey('id')) ...[
                     Row(
                       children: [
                         Expanded(

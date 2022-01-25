@@ -50,9 +50,9 @@ class CustomUserListTile extends StatelessWidget {
               );
             } else if (boxValue == 'email') {
               return Text(
-                box.get('user')[boxValue] ??
-                    box.get('user')['unconfirmed_email'] ??
-                    title,
+                box.get('user')[boxValue].isNotEmpty
+                    ? box.get('user')[boxValue]
+                    : box.get('user')['unconfirmed_email'] ?? title,
                 style: const TextStyle(fontSize: 16),
               );
             } else {

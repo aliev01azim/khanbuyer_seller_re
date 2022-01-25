@@ -2,16 +2,12 @@
 
 import 'package:dio/dio.dart' as dio;
 import 'package:get/get.dart';
-import 'package:hive/hive.dart';
-import 'package:khanbuer_seller_re/screens/drawers_screens/account/user_data/user_data.dart';
 import 'package:khanbuer_seller_re/screens/home_screen.dart';
 import 'package:khanbuer_seller_re/screens/start_screens/otp_screen.dart';
 
 import '../helpers/api_services.dart';
 import '../helpers/user_session.dart' as u;
 import '../helpers/alerts.dart';
-import '../helpers/constants.dart';
-import '../screens/auth_screen/auth_screen.dart';
 import 'all_bindings.dart';
 
 enum UserStatus {
@@ -102,12 +98,12 @@ class AuthController extends GetxController {
     }
   }
 
-  Future<void> logout() async {
-    await Hive.box('userBox').clear();
-    status = UserStatus.Unauthenticated;
-    Get.offAll(const AuthScreen());
-    update();
-  }
+  // Future<void> logout() async {
+  //   await Hive.box('userBox').clear();
+  //   status = UserStatus.Unauthenticated;
+  //   Get.offAll(const AuthScreen());
+  //   update();
+  // }
 
   // Future<void> checkSession() async {
   //   SharedPreferences preferences = await SharedPreferences.getInstance();
@@ -125,7 +121,6 @@ class AuthController extends GetxController {
   //     Get.off(const AuthScreen());
   //   }
   // }
-
   // Future<void> requestRecoveryMessage(email) async {
   //   loadingRecovery = true;
   //   update();
@@ -157,14 +152,11 @@ class AuthController extends GetxController {
         status = UserStatus.WrongCredentials;
         errorAlert(result['errors']['code']);
       } else {
-        await u.sessionSaveUser(result['user']);
-        status = UserStatus.IsAuthenticated;
-        if (!result['user']['roles'].containsKey(Roles.seller)) {
-          Get.offAll(() => BuyerScreen(), binding: AuthBinding());
-        } else {
-          Get.offAll(() => SellerScreen(), binding: AuthBinding());
-        }
+        dio.Response response2 = await loginApi();
+        await u.sessionSaveUser(response2.data);
         code = cod;
+        status = UserStatus.IsAuthenticated;
+        Get.offAll(() => SellerScreen(), binding: AuthBinding());
       }
     } catch (error) {
       errorAlert(error);

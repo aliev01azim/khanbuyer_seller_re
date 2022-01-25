@@ -2,15 +2,15 @@ import 'dart:io';
 import 'dart:convert';
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
-
-import 'constants.dart';
-import 'user_session.dart';
+import 'package:hive_flutter/hive_flutter.dart';
 
 const corsProxy = 'https://cors.prosoft.kg/';
 
 class Config {
   static const baseUrl = 'https://khan.prosoft.kg';
 }
+
+Map user = Hive.box('userBox').get('user', defaultValue: {});
 
 final dio = Dio(
   BaseOptions(
@@ -41,16 +41,6 @@ Future<bool> checkConnection() async {
   }
 }
 
-Future loginApi(String email, String password) async {
-  await checkConnection();
-  final String basicAuth =
-      'Basic ' + base64Encode(utf8.encode('$email:$password'));
-  return dio.post(
-    '/api/users/login',
-    options: Options(headers: {'Authorization': basicAuth}),
-  );
-}
-
 Future registerApi(String number) async {
   await checkConnection();
   return dio2.post(
@@ -59,11 +49,12 @@ Future registerApi(String number) async {
   );
 }
 
-Future requestRecoveryMessageApi(String email) async {
+Future loginApi() async {
   await checkConnection();
+
   return dio.post(
-    '/api/user/request-recovery-message',
-    data: {'email': email},
+    '/api/user/login',
+    data: {'seller': 1},
   );
 }
 
@@ -163,10 +154,10 @@ Future removeColorApi(data) async {
   );
 }
 
-Future getProductsApi() async {
+Future getProductsApi(String filter) async {
   await checkConnection();
   return dio.get(
-    '/api/seller-products',
+    '/api/seller-products?$filter',
   );
 }
 
@@ -212,5 +203,26 @@ Future removeColorImageApi(data) async {
   return dio.post(
     '/api/seller-products/remove-color-image',
     data: data,
+  );
+}
+
+Future getOrdersApi() async {
+  await checkConnection();
+  return dio.get(
+    '/api/seller-orders/list?expand=items',
+  );
+}
+
+Future getDetailedOrdersApi() async {
+  await checkConnection();
+  return dio.get(
+    '/api/seller-orders/view-item?id=28&expand=order,product',
+  );
+}
+
+Future getProcessStatusesApi() async {
+  await checkConnection();
+  return dio.get(
+    '/api/orders/process-status-options',
   );
 }

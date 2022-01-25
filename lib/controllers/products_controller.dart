@@ -1,10 +1,12 @@
 import 'package:get/get.dart';
+import 'package:hive_flutter/hive_flutter.dart';
 import 'package:khanbuer_seller_re/helpers/alerts.dart';
 import 'package:khanbuer_seller_re/helpers/api_services.dart';
 import 'package:dio/dio.dart' as dio;
 import 'package:khanbuer_seller_re/screens/drawers_screens/my_shop_screen/add_product_screen/widgets/product_view.dart';
 
 import '../helpers/user_session.dart';
+import '../screens/drawers_screens/my_shop_screen/my_shop_screen.dart';
 
 // ignore: constant_identifier_names
 enum AddProductStatus { Initial, Loading, Error }
@@ -18,6 +20,7 @@ class ProductsController extends GetxController {
   List _seasons = [];
   List _genders = [];
   List _sizeTypes = [];
+  int _pageIndex = 1;
 
   AddProductStatus get addProductStatus => status;
 
@@ -31,49 +34,36 @@ class ProductsController extends GetxController {
   dynamic get editedProduct => _editedProduct;
 
   Future<void> getSellerProducts({
-    bool filter = false,
+    bool loadMore = false,
   }) async {
-    // if (filter) {
-    //   _pageIndex = 1;
-    //   _status = Status.Loading;
-    //   _products = [];
-    //   update();
-    // }
-    // dynamic params = [
-    //   'per-page=20',
-    //   'page=$_pageIndex',
-    // ];
-    // _filters.forEach((key, value) {
-    //   if (value is List) {
-    //     for (var element in value) {
-    //       if (key == 'category_id') {
-    //         params.add('ProductSearch[category_ids][]=$element');
-    //       } else {
-    //         params.add('ProductSearch[$key]=$element');
-    //       }
-    //     }
-    //   } else {
-    //     if (value != null) {
-    //       if (key == 'size') {
-    //         params.add('ProductSearch[$value]=56');
-    //       } else {
-    //         params.add('ProductSearch[$key]=$value');
-    //       }
-    //     }
-    //   }
-    // });
-    // params.removeWhere((String element) => element.endsWith('=null'));
-    // params = params.join('&');
+    if (loadMore) {
+      _pageIndex = _pageIndex + 1;
+      status = AddProductStatus.Loading;
+      update();
+    } else {
+      _pageIndex = 1;
+    }
+    dynamic params = [
+      'per-page=20',
+      'page=$_pageIndex',
+    ];
+    params = params.join('&');
     status = AddProductStatus.Loading;
     update();
     try {
-      dio.Response response = await getProductsApi();
+      dio.Response response = await getProductsApi(params);
       final result = response.data;
-      List _prods = [];
-      result.forEach((p) {
-        _prods.add(p);
-      });
-      _products = _prods;
+
+      if (loadMore) {
+        if (_products[_products.length - 1]['id'] !=
+            result[result.length - 1]['id']) {
+          _products = [..._products, ...result];
+        } else {
+          _pageIndex = _pageIndex - 1;
+        }
+      } else {
+        _products = result;
+      }
       print('products : $result');
       status = AddProductStatus.Initial;
     } on dio.DioError catch (error) {
@@ -188,14 +178,18 @@ class ProductsController extends GetxController {
     }
   }
 
-  Future<void> addProduct(formData) async {
+  Future<void> addProduct(formData, bool arg) async {
     try {
       status = AddProductStatus.Loading;
       update();
       dio.Response response = await addProductApi(formData);
       if (response.data['success']) {
         _products.add(response.data['product']);
-        Get.back(closeOverlays: true);
+        if (!arg) {
+          Get.back(closeOverlays: true);
+        } else {
+          Get.offAll(() => MyShopScreen());
+        }
         successAlert('Продукт добавлен!');
       } else {
         errorAlert(response);
@@ -399,6 +393,8 @@ class ProductsController extends GetxController {
     try {
       dio.Response response = await editShopApi(data);
       final result = response.data;
+      Map user = Hive.box('userBox').get('user', defaultValue: {});
+
       if (result.containsKey('success') && result['success']) {
         user['shop']['title'] = data['title'];
         user['shop']['description'] = data['description'];

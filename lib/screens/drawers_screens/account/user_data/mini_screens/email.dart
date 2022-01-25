@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
+import 'package:hive_flutter/hive_flutter.dart';
 import 'package:khanbuer_seller_re/controllers/auth_controller.dart';
 import 'package:khanbuer_seller_re/helpers/user_session.dart';
 import 'package:khanbuer_seller_re/widgets/custom_button.dart';
@@ -14,7 +15,16 @@ class Email extends StatefulWidget {
 
 class _EmailState extends State<Email> {
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
-  String data = user['email'] ?? user['unconfirmed_email'] ?? '';
+  Map user = Hive.box('userBox').get('user', defaultValue: {});
+  @override
+  void initState() {
+    data = user['email'].isNotEmpty
+        ? user['email']
+        : user['unconfirmed_email'] ?? '';
+    super.initState();
+  }
+
+  String data = '';
   final _authController = Get.find<AuthController>();
   Future<void> _handleRequest() async {
     if (_formKey.currentState!.validate()) {
@@ -33,7 +43,9 @@ class _EmailState extends State<Email> {
               final bool loading = _.userEditStatus == UserEditStatus.Loading;
 
               return IconButton(
-                onPressed: user['unconfirmed_email'] != data
+                onPressed: user['email'] != data &&
+                        user['unconfirmed_email'] != data &&
+                        data.isNotEmpty
                     ? () async => _handleRequest()
                     : null,
                 icon: loading ? const IndicatorMini() : const Icon(Icons.done),
@@ -54,6 +66,7 @@ class _EmailState extends State<Email> {
                 }
               },
               initialValue: data,
+              autofocus: true,
               onChanged: (val) {
                 setState(() {
                   data = val;
