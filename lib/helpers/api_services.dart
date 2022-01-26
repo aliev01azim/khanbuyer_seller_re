@@ -213,10 +213,10 @@ Future getOrdersApi() async {
   );
 }
 
-Future getDetailedOrdersApi() async {
+Future getDetailedOrderApi(id) async {
   await checkConnection();
   return dio.get(
-    '/api/seller-orders/view-item?id=28&expand=order,product',
+    '/api/seller-orders/$id?expand=items.product',
   );
 }
 
@@ -224,5 +224,21 @@ Future getProcessStatusesApi() async {
   await checkConnection();
   return dio.get(
     '/api/orders/process-status-options',
+  );
+}
+
+Future editOrderItemApi(data) async {
+  await checkConnection();
+  return dio.post(
+    '/api/seller-orders/edit-item',
+    data: data,
+  );
+}
+
+Future editOrderApi(data) async {
+  await checkConnection();
+  return dio.post(
+    '/api/seller-orders/edit',
+    data: data,
   );
 }
