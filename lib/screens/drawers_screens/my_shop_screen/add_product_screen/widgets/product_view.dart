@@ -34,7 +34,7 @@ class _ProductScreenState extends State<ProductScreen> {
             tooltip: 'Удалить продукт',
             onPressed: () async {
               return await Get.dialog(
-                AppDialog(
+                AppProductsDialog(
                   title: 'Вы уверены что хотите удалить продукт?',
                   onConfirm: () =>
                       _controller.removeProduct(widget.product['id']),
@@ -170,7 +170,7 @@ class _ProductScreenState extends State<ProductScreen> {
                               return GestureDetector(
                                 onTap: () async {
                                   return await Get.dialog(
-                                    AppDialog(
+                                    AppProductsDialog(
                                       title:
                                           'Вы уверены что хотите удалить цвет?',
                                       onConfirm: () => _.removeColor(

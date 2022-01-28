@@ -131,6 +131,7 @@ class OrderInfo extends StatelessWidget {
                                 )
                               : null,
                         ),
+                        const TextSpan(text: ' c')
                       ],
                     ),
                   ),

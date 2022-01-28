@@ -16,16 +16,20 @@ class Indicator extends StatelessWidget {
 }
 
 class IndicatorMini extends StatelessWidget {
-  const IndicatorMini({Key? key}) : super(key: key);
+  final Color? color;
+  const IndicatorMini({
+    Key? key,
+    this.color = Colors.white,
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    return const SizedBox(
+    return SizedBox(
       height: 12,
       width: 12,
       child: CircularProgressIndicator(
         strokeWidth: 2,
-        color: Colors.white,
+        color: color,
       ),
     );
   }

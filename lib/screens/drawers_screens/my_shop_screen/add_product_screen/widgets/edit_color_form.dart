@@ -28,11 +28,9 @@ class _EditColorFormState extends State<EditColorForm> {
   final TextEditingController _titleController = TextEditingController();
   final TextEditingController _codeController = TextEditingController();
   final TextEditingController _priceController = TextEditingController();
-  // final TextEditingController _inStockController = TextEditingController();
 
   final FocusNode _codeFocusNode = FocusNode();
   final FocusNode _priceFocusNode = FocusNode();
-  // final FocusNode _inStockFocusNode = FocusNode();
 
   final List<String> _vals = const ['Да', 'Нет'];
   String _selectedVal = 'Да';
@@ -42,8 +40,6 @@ class _EditColorFormState extends State<EditColorForm> {
     _codeController.value = TextEditingValue(text: widget.color['item_code']);
     _priceController.value = TextEditingValue(text: widget.color['price']);
     _selectedVal = widget.color['inStockTitle'];
-    // _inStockController.value =
-    //     TextEditingValue(text: widget.color['in_stock'].toString());
     _networkImages = widget.color['pictures']
         .where((element) => element['id'] != null)
         .toList();
@@ -55,11 +51,9 @@ class _EditColorFormState extends State<EditColorForm> {
     _titleController.dispose();
     _codeController.dispose();
     _priceController.dispose();
-    // _inStockController.dispose();
 
     _codeFocusNode.dispose();
     _priceFocusNode.dispose();
-    // _inStockFocusNode.dispose();
     super.dispose();
   }
 
@@ -208,9 +202,6 @@ class _EditColorFormState extends State<EditColorForm> {
                   validator: requiredValidation,
                   focusNode: _priceFocusNode,
                   controller: _priceController,
-                  // onFieldSubmitted: (_) {
-                  //   FocusScope.of(context).requestFocus(_inStockFocusNode);
-                  // },
                   textInputAction: TextInputAction.done,
                   keyboardType: TextInputType.number,
                   decoration: inputDecoration,
@@ -223,7 +214,6 @@ class _EditColorFormState extends State<EditColorForm> {
                     fontWeight: FontWeight.w500,
                   ),
                 ),
-
                 DropdownButton(
                   value: _selectedVal,
                   onChanged: (String? newValue) {
@@ -238,15 +228,6 @@ class _EditColorFormState extends State<EditColorForm> {
                     );
                   }).toList(),
                 ),
-                // TextFormField(
-                //   validator: requiredValidation,
-                //   focusNode: _inStockFocusNode,
-                //   controller: _inStockController,
-                //   textInputAction: TextInputAction.done,
-                //   keyboardType: TextInputType.number,
-                //   decoration: inputDecoration,
-                //   style: textStyle,
-                // ),
                 Container(
                   margin: const EdgeInsets.only(
                     top: 24,

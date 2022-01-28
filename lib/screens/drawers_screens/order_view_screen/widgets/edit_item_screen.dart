@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:khanbuer_seller_re/helpers/colors.dart';
 import 'package:khanbuer_seller_re/widgets/custom_button.dart';
-import 'package:dio/dio.dart' as dio;
 
 import '../../../../controllers/orders_controller.dart';
 
@@ -14,13 +13,6 @@ class EditItemScreen extends StatefulWidget {
 }
 
 class _EditItemScreenState extends State<EditItemScreen> {
-  final _controller = Get.find<OrdersController>();
-
-  void _handleSubmit() async {
-    print(widget.item);
-    // await _controller.editItem(formData, widget.product);
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -28,35 +20,13 @@ class _EditItemScreenState extends State<EditItemScreen> {
         title: const Text('Изменить '),
       ),
       body: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 8),
-        child: Column(
-          children: [
-            const SizedBox(
-              height: 30,
-            ),
-            ...widget.item.map((c) {
-              return RowItem(c);
-            }).toList(),
-            GetBuilder<OrdersController>(
-              builder: (_) {
-                final bool loading =
-                    _.editOrderStatus == EditOrderStatus.Loading;
-                return CustomButton(
-                  child: const Text('Сохранить'),
-                  onPressed: () => _handleSubmit,
-                  loading: loading,
-                  height: 56,
-                  buttonStyle: ButtonStyle(
-                    shape: MaterialStateProperty.all(
-                      const RoundedRectangleBorder(
-                        borderRadius: BorderRadius.zero,
-                      ),
-                    ),
-                  ),
-                );
-              },
-            )
-          ],
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 10),
+        child: ListView.builder(
+          itemCount: widget.item.length,
+          itemBuilder: (_, index) => RowItem(
+            widget.item,
+            widget.item[index],
+          ),
         ),
       ),
     );
@@ -64,7 +34,8 @@ class _EditItemScreenState extends State<EditItemScreen> {
 }
 
 class RowItem extends StatefulWidget {
-  const RowItem(this.c, {Key? key}) : super(key: key);
+  const RowItem(this.o, this.c, {Key? key}) : super(key: key);
+  final dynamic o;
   final dynamic c;
   @override
   _RowItemState createState() => _RowItemState();
@@ -85,40 +56,73 @@ class _RowItemState extends State<RowItem> {
       child: Padding(
         padding: const EdgeInsets.symmetric(vertical: 5, horizontal: 12),
         child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          mainAxisAlignment: MainAxisAlignment.start,
           children: [
-            Text(widget.c['color_name']),
-            Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                IconButton(
-                  disabledColor: AppColors.hint,
-                  color: AppColors.favorite,
-                  onPressed: quantity > 0
-                      ? () {
-                          setState(() {
-                            quantity--;
-                          });
-                        }
-                      : null,
-                  icon: const Icon(
-                    Icons.remove,
+            Expanded(
+              child: Text(widget.c['color_name']),
+              flex: 5,
+            ),
+            Expanded(
+              flex: 3,
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  IconButton(
+                    disabledColor: AppColors.hint,
+                    color: AppColors.favorite,
+                    onPressed: quantity > 0
+                        ? () {
+                            setState(() {
+                              quantity--;
+                            });
+                          }
+                        : null,
+                    icon: const Icon(
+                      Icons.remove,
+                    ),
                   ),
-                ),
-                Text(quantity.toString()),
-                IconButton(
+                  Text(quantity.toString()),
+                  IconButton(
                     disabledColor: AppColors.hint,
                     color: AppColors.success,
-                    onPressed: quantity >= widget.c['quantity_in_fact']
-                        ? null
-                        : () {
+                    onPressed: quantity < widget.c['quantity']
+                        ? () {
                             setState(() {
                               quantity++;
                             });
-                          },
-                    icon: const Icon(Icons.add)),
-              ],
-            )
+                          }
+                        : null,
+                    icon: const Icon(Icons.add),
+                  ),
+                ],
+              ),
+            ),
+            Expanded(
+              flex: 1,
+              child: GetBuilder<OrdersController>(
+                builder: (_) {
+                  // final orderIndex =
+                  //     _.orderDetails['grouped'].values.toList().indexOf(widget.o);
+                  // final coloIndex = widget.o.indexOf(widget.c);
+                  // final color = _.orderDetails['grouped'].values
+                  //     .toList()[orderIndex][coloIndex];
+                  final bool loading =
+                      _.editItemStatus == EditItemStatus.Loading
+                      // &&
+                      //     color['id'] == widget.c['id']
+                      ;
+                  return IconButton(
+                    onPressed: quantity != widget.c['quantity_in_fact']
+                        ? () async => _.editOrderItem(
+                            widget.c['id'], quantity, widget.c['product_id'])
+                        : null,
+                    icon: loading
+                        ? const IndicatorMini(color: Colors.blue)
+                        : const Icon(Icons.done),
+                  );
+                },
+              ),
+            ),
           ],
         ),
       ),

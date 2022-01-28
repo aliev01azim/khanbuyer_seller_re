@@ -8,7 +8,7 @@ import '../../../../widgets/custom_image.dart';
 import 'edit_item_screen.dart';
 
 class ProductsList extends StatelessWidget {
-  final List products;
+  final Map products;
 
   const ProductsList({
     Key? key,
@@ -21,26 +21,24 @@ class ProductsList extends StatelessWidget {
     final List _inProcess = [];
     final List _readyToSend = [];
     final List _completed = [];
-    for (var prod in products) {
-      prod['grouped'].values.forEach((element) {
-        final bool isCompleted = element.every((e) => e['status'] == 3);
-        final bool isReadyToSend = element.every((e) => e['status'] == 2);
-        final bool isInProcess = element.every((e) => e['status'] == 1);
-        final bool isNew = element.every((e) => e['status'] == 0);
-        if (isNew) {
-          _new.add(element);
-        }
-        if (isInProcess) {
-          _inProcess.add(element);
-        }
-        if (isReadyToSend) {
-          _readyToSend.add(element);
-        }
-        if (isCompleted) {
-          _completed.add(element);
-        }
-      });
-    }
+    products['grouped'].values.forEach((element) {
+      final bool isCompleted = element.every((e) => e['status'] == 3);
+      final bool isReadyToSend = element.every((e) => e['status'] == 2);
+      final bool isInProcess = element.every((e) => e['status'] == 1);
+      final bool isNew = element.every((e) => e['status'] == 0);
+      if (isNew) {
+        _new.add(element);
+      }
+      if (isInProcess) {
+        _inProcess.add(element);
+      }
+      if (isReadyToSend) {
+        _readyToSend.add(element);
+      }
+      if (isCompleted) {
+        _completed.add(element);
+      }
+    });
 
     return Column(children: [
       _completed.isNotEmpty
@@ -102,12 +100,7 @@ class ProductsListByStatus extends StatelessWidget {
             if (item[0]['product'] == null) {
               return const SizedBox();
             }
-            int summa = 0;
-            item.forEach((co) {
-              summa = summa +
-                  (co['quantity_in_fact'] * double.parse(co['price']).ceil()
-                      as int);
-            });
+
             return Container(
               margin: const EdgeInsets.only(bottom: 10),
               decoration: const BoxDecoration(
@@ -187,31 +180,46 @@ class ProductsListByStatus extends StatelessWidget {
                                         ),
                                       ),
                                       Expanded(
-                                        child: RichText(
-                                          text: TextSpan(
-                                            style: const TextStyle(
-                                              fontSize: 12,
-                                              fontWeight: FontWeight.w300,
-                                              color: Colors.black,
-                                            ),
-                                            children: [
-                                              TextSpan(
-                                                text:
-                                                    '${c['quantity_in_fact']}',
-                                                style: c['quantity_in_fact'] <
-                                                        c['quantity']
-                                                    ? TextStyle(
-                                                        color:
-                                                            AppColors.favorite,
-                                                      )
-                                                    : null,
+                                        child: GetBuilder<OrdersController>(
+                                          builder: (_) {
+                                            final orderIndex = _
+                                                .orderDetails['grouped'].values
+                                                .toList()
+                                                .indexOf(item);
+                                            final coloIndex = item.indexOf(c);
+                                            final color = _
+                                                    .orderDetails['grouped']
+                                                    .values
+                                                    .toList()[orderIndex]
+                                                [coloIndex];
+                                            return RichText(
+                                              text: TextSpan(
+                                                style: const TextStyle(
+                                                  fontSize: 12,
+                                                  fontWeight: FontWeight.w300,
+                                                  color: Colors.black,
+                                                ),
+                                                children: [
+                                                  TextSpan(
+                                                    text:
+                                                        '${color['quantity_in_fact']}',
+                                                    style:
+                                                        c['quantity_in_fact'] <
+                                                                c['quantity']
+                                                            ? TextStyle(
+                                                                color: AppColors
+                                                                    .favorite,
+                                                              )
+                                                            : null,
+                                                  ),
+                                                  TextSpan(
+                                                    text:
+                                                        '/${c['quantity']}   x   ${double.parse(c['price']).ceil()} сом',
+                                                  ),
+                                                ],
                                               ),
-                                              TextSpan(
-                                                text:
-                                                    '/${c['quantity']}   x   ${double.parse(c['price']).ceil()} сом',
-                                              ),
-                                            ],
-                                          ),
+                                            );
+                                          },
                                         ),
                                       ),
                                     ],
@@ -219,14 +227,30 @@ class ProductsListByStatus extends StatelessWidget {
                                 ),
                               )
                               .toList(),
-                          Container(
-                            padding: const EdgeInsets.only(top: 10),
-                            child: Text(
-                              'Сумма: $summa сом',
-                              style: const TextStyle(
-                                fontWeight: FontWeight.w500,
-                              ),
-                            ),
+                          GetBuilder<OrdersController>(
+                            builder: (_) {
+                              int summa = 0;
+                              final itemIndex = _.orderDetails['grouped'].values
+                                  .toList()
+                                  .indexOf(item);
+                              _.orderDetails['grouped'].values
+                                  .toList()[itemIndex]
+                                  .forEach((orderItem) {
+                                summa = summa +
+                                    (orderItem['quantity_in_fact'] *
+                                        double.parse(orderItem['price'])
+                                            .ceil() as int);
+                              });
+                              return Container(
+                                padding: const EdgeInsets.only(top: 10),
+                                child: Text(
+                                  'Сумма: $summa сом',
+                                  style: const TextStyle(
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                ),
+                              );
+                            },
                           ),
                         ],
                       ),

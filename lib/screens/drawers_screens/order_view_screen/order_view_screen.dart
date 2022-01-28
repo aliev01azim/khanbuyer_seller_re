@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:khanbuer_seller_re/controllers/orders_controller.dart';
+import '../../../helpers/app_dialog.dart';
 import '../../../widgets/custom_button.dart';
-import '../orders_screen/widgets/order_info.dart';
 import './widgets/products_list.dart';
 import './widgets/total.dart';
+import 'widgets/order_info.dart';
 
 class OrderViewScreen extends StatelessWidget {
   OrderViewScreen({Key? key}) : super(key: key);
@@ -15,9 +16,6 @@ class OrderViewScreen extends StatelessWidget {
     }
   }
 
-  void _handleSubmit() async {
-    // await _controller.editItem(formData, widget.product);
-  }
   @override
   Widget build(BuildContext context) {
     final Map order = ModalRoute.of(context)?.settings.arguments as Map;
@@ -45,24 +43,24 @@ class OrderViewScreen extends StatelessWidget {
                       products: _controller.orderDetails,
                     ),
                     Total(items: order['items']),
-                    GetBuilder<OrdersController>(
-                      builder: (_) {
-                        final bool loading =
-                            _.ordersStatus == OrdersStatus.Loading;
-                        return CustomButton(
-                          child: const Text('ОТПРАВИТЬ'),
-                          onPressed: () => _handleSubmit,
-                          loading: loading,
-                          height: 56,
-                          buttonStyle: ButtonStyle(
-                            shape: MaterialStateProperty.all(
-                              const RoundedRectangleBorder(
-                                borderRadius: BorderRadius.zero,
-                              ),
-                            ),
+                    CustomButtonForDialog(
+                      child: const Text('ОТПРАВИТЬ'),
+                      onPressed: () async => await Get.dialog(
+                        AppOrdersDialog(
+                          title: 'Вы уверены что хотите изменить заказ?',
+                          onCancel: () => Get.back(),
+                          onConfirm: () async =>
+                              await _controller.editOrder(order),
+                        ),
+                      ),
+                      height: 56,
+                      buttonStyle: ButtonStyle(
+                        shape: MaterialStateProperty.all(
+                          const RoundedRectangleBorder(
+                            borderRadius: BorderRadius.zero,
                           ),
-                        );
-                      },
+                        ),
+                      ),
                     ),
                   ] else ...[
                     const Center(

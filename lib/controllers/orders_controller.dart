@@ -1,5 +1,8 @@
 // ignore_for_file: constant_identifier_names
 
+import 'dart:developer';
+
+import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:dio/dio.dart' as dio;
 
@@ -12,7 +15,7 @@ enum EditItemStatus { Initial, Loading }
 
 class OrdersController extends GetxController {
   List _orders = [];
-  List _orderDetails = [];
+  Map _orderDetails = {};
   int _orderId = 0;
   Map _processStatuses = {};
   OrdersStatus _ordersStatus = OrdersStatus.Initial;
@@ -21,10 +24,11 @@ class OrdersController extends GetxController {
 
   List get orders => _orders;
   int get orderId => _orderId;
-  List get orderDetails => _orderDetails;
+  Map get orderDetails => _orderDetails;
   Map get processStatuses => _processStatuses;
   OrdersStatus get ordersStatus => _ordersStatus;
   EditOrderStatus get editOrderStatus => _editOrderStatus;
+  EditItemStatus get editItemStatus => _editItemStatus;
   Future<void> getOrders() async {
     _ordersStatus = OrdersStatus.Loading;
     update();
@@ -44,7 +48,6 @@ class OrdersController extends GetxController {
     try {
       dio.Response response = await getDetailedOrderApi(id);
       _orderId = id;
-      List orders = [];
       Map<int, dynamic> grouped = <int, dynamic>{};
       for (var item in response.data['items']) {
         if (grouped.containsKey(item['product_id'])) {
@@ -57,10 +60,8 @@ class OrdersController extends GetxController {
         ...response.data,
         'grouped': grouped,
       };
-      orders.add(o);
-      _orderDetails = orders;
+      _orderDetails = o;
     } catch (error) {
-      print(error);
       errorAlert(error);
     } finally {
       update();
@@ -82,7 +83,8 @@ class OrdersController extends GetxController {
     }
   }
 
-  Future<void> editItem(id, quantity, args) async {
+  Future<void> editOrderItem(id, quantity, prodId) async {
+    // print(_orderDetails['grouped'][prodId][orderIndex]['quantity_in_fact']);
     _editItemStatus = EditItemStatus.Loading;
     update();
     try {
@@ -91,20 +93,14 @@ class OrdersController extends GetxController {
         'quantity_in_fact': quantity,
         'is_added_to_order': 1,
       };
+
       dio.Response response = await editOrderItemApi(data);
       if (response.data['success']) {
-        _orderDetails[args['productId']]['orders'][args['orderId']]['colors']
-            .removeWhere((color) => color['item_id'] == id);
-        if (_orderDetails[args['productId']]['orders'][args['orderId']]
-                ['colors']
-            .isEmpty) {
-          Get.back();
-          _orderDetails[args['productId']]['orders'].remove(args['orderId']);
-          if (_orderDetails[args['productId']]['orders'].isEmpty) {
-            Get.back();
-            _orderDetails.remove(args['productId']);
-          }
-        }
+        final order = _orderDetails['grouped'][prodId]
+            .firstWhere((element) => element['id'] == id);
+        final orderIndex = _orderDetails['grouped'][prodId].indexOf(order);
+        _orderDetails['grouped'][prodId][orderIndex]['quantity_in_fact'] =
+            quantity;
       }
     } on dio.DioError catch (e) {
       errorAlert(e.response);
@@ -116,20 +112,36 @@ class OrdersController extends GetxController {
     }
   }
 
-  Future<void> editOrder(args, requestBody, statusCode) async {
-    _editOrderStatus = EditOrderStatus.Loading;
-    update();
+  Future<void> editOrder(order) async {
     try {
-      dio.Response response = await editOrderApi(requestBody);
-      if (response.data['success']) {
-        _orders[args['productId']]['orders'][args['orderId']]
-            ['process_status'] = statusCode;
-        _orders[args['productId']]['orders'][args['orderId']] = response.data;
+      _editOrderStatus = EditOrderStatus.Loading;
+      update();
+
+      final Map data = {
+        'id': order['id'],
+        'recipient_name': order['recipient_name'],
+        'recipient_phone_number': order['recipient_phone_number'],
+        'recipient_address': order['recipient_address'],
+        'process_status': 3,
+      };
+      dio.Response response = await editOrderApi(data);
+      final result = response.data;
+      if (result['success']) {
+        final _order =
+            _orders.firstWhere((element) => element['id'] == order['id']);
+        final _orderIndex = _orders.indexOf(_order);
+        _orders[_orderIndex]['process_status'] =
+            result['product']['process_status'];
+        _orders[_orderIndex]['sum_in_fact'] = result['product']['sum_in_fact'];
+        Get.back(closeOverlays: true);
+        successAlert(response.data['message']);
+      } else {
+        errorAlert(response.data);
       }
-    } on dio.DioError catch (e) {
-      errorAlert(e.response);
-    } catch (e) {
-      errorAlert(e);
+    } on dio.DioError catch (error) {
+      errorAlert(error.response?.data);
+    } catch (error) {
+      errorAlert(error);
     } finally {
       _editOrderStatus = EditOrderStatus.Initial;
       update();

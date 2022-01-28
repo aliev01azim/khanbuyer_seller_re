@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+
+import '../../../../controllers/orders_controller.dart';
 
 class Total extends StatelessWidget {
   final List items;
@@ -12,51 +15,61 @@ class Total extends StatelessWidget {
         horizontal: 25,
         vertical: 20,
       ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          RichText(
-            text: TextSpan(
-              style: const TextStyle(
-                color: Colors.black,
-              ),
-              children: [
-                const TextSpan(
-                  text: 'Всего линеек: ',
-                ),
-                TextSpan(
-                  text: '${items.fold(
-                    0,
-                    (num t, e) => t + e['quantity_in_fact'],
-                  )}',
+      child: GetBuilder<OrdersController>(
+        builder: (_) {
+          int quantity = 0;
+          int summa = 0;
+          _.orderDetails['grouped'].forEach((_, prod) {
+            prod.forEach((value) {
+              summa = summa +
+                  (value['quantity_in_fact'] *
+                      double.parse(value['price']).ceil() as int);
+              quantity = quantity + value['quantity_in_fact'] as int;
+            });
+          });
+          return Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              RichText(
+                text: TextSpan(
                   style: const TextStyle(
-                    fontWeight: FontWeight.w500,
+                    color: Colors.black,
                   ),
+                  children: [
+                    const TextSpan(
+                      text: 'Всего линеек: ',
+                    ),
+                    TextSpan(
+                      text: '$quantity шт.',
+                      style: const TextStyle(
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ],
                 ),
-              ],
-            ),
-          ),
-          const SizedBox(width: 20),
-          RichText(
-            text: TextSpan(
-              style: const TextStyle(
-                color: Colors.black,
               ),
-              children: [
-                const TextSpan(
-                  text: 'Общая сумма: ',
-                ),
-                TextSpan(
-                  text:
-                      '${items.fold(0, (num t, e) => t + double.parse(e['price']) * e['quantity_in_fact'])}',
+              const SizedBox(width: 20),
+              RichText(
+                text: TextSpan(
                   style: const TextStyle(
-                    fontWeight: FontWeight.w500,
+                    color: Colors.black,
                   ),
+                  children: [
+                    const TextSpan(
+                      text: 'Общая сумма: ',
+                    ),
+                    TextSpan(
+                      text: '$summa c',
+                      style: const TextStyle(
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ],
                 ),
-              ],
-            ),
-          ),
-        ],
+              ),
+            ],
+          );
+        },
       ),
       margin: const EdgeInsets.symmetric(vertical: 20),
       decoration: const BoxDecoration(
