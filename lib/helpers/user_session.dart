@@ -24,7 +24,7 @@ import 'package:path_provider/path_provider.dart';
 //   }
 // }
 
-Future<void> sessionSaveUser(dynamic data) async {
+Future<void> sessionSaveUser(data) async {
   if (!await Hive.boxExists('userBox')) {
     await Hive.openBox('userBox').onError((error, stackTrace) async {
       final Directory dir = await getApplicationDocumentsDirectory();
@@ -37,5 +37,5 @@ Future<void> sessionSaveUser(dynamic data) async {
       throw 'Failed to open userBox Box\nError: $error';
     });
   }
-  await Hive.box<dynamic>('userBox').put('user', data);
+  await Hive.box('userBox').put('user', data);
 }

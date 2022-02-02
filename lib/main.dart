@@ -55,7 +55,7 @@ class MyApp extends StatelessWidget {
   const MyApp({Key? key}) : super(key: key);
   @override
   Widget build(BuildContext context) {
-    Map user = Hive.box('userBox').get('user', defaultValue: {});
+    final user = Hive.box('userBox').get('user', defaultValue: {});
     print(user);
     return GetMaterialApp(
       title: 'Khunbuyer',
@@ -66,9 +66,7 @@ class MyApp extends StatelessWidget {
 
       debugShowCheckedModeBanner: false,
       // ignore: unnecessary_null_comparison
-      home: (Hive.box('userBox').get('user', defaultValue: {})).isEmpty
-          ? const StartScreen()
-          : SellerScreen(),
+      home: user.isEmpty ? const StartScreen() : SellerScreen(),
       initialBinding: AuthBinding(),
     );
   }

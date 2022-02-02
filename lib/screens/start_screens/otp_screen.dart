@@ -111,7 +111,8 @@ class _OtpScreenState extends State<OtpScreen> {
             ),
             GetBuilder<AuthController>(
               builder: (_) {
-                final bool loading = _.status == UserStatus.Authenticating;
+                final bool loading =
+                    _.checkStatus == CheckStatus.Authenticating;
                 return CustomButton(
                   height: 48,
                   width: double.infinity,

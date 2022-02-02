@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:hive_flutter/hive_flutter.dart';
+import 'dart:developer';
 
 const corsProxy = 'https://cors.prosoft.kg/';
 
@@ -41,12 +42,22 @@ Future<bool> checkConnection() async {
   }
 }
 
-Future registerApi(String number) async {
+Future registerApi(data) async {
   await checkConnection();
   return dio2.post(
     '/api/user/register',
-    data: {'username': number},
+    data: data,
   );
+}
+
+Future<Response> checkConfirmationCodeApi(data) async {
+  await checkConnection();
+  var res = await dio2.post(
+    '/api/user/check-confirmation-code',
+    data: data,
+  );
+  //log('checkConfirmationCodeApi $res');
+  return res;
 }
 
 Future loginApi() async {
@@ -55,14 +66,6 @@ Future loginApi() async {
   return dio.post(
     '/api/user/login',
     data: {'seller': 1},
-  );
-}
-
-Future checkConfirmationCodeApi(String code) async {
-  await checkConnection();
-  return dio2.post(
-    '/api/user/check-confirmation-code',
-    data: {'code': code},
   );
 }
 

@@ -1,5 +1,7 @@
 // ignore_for_file: constant_identifier_names
 
+import 'dart:developer';
+
 import 'package:dio/dio.dart' as dio;
 import 'package:get/get.dart';
 import 'package:khanbuer_seller_re/screens/home_screen.dart';
@@ -14,14 +16,18 @@ enum UserStatus {
   IsAuthenticated,
   Authenticating,
   Unauthenticated,
-  WrongCredentials
+}
+enum CheckStatus {
+  IsAuthenticated,
+  Authenticating,
+  Unauthenticated,
 }
 
 enum UserEditStatus { Initial, Loading }
 
 class AuthController extends GetxController {
   UserStatus status = UserStatus.Unauthenticated;
-  bool loadingRecovery = false;
+  CheckStatus checkStatus = CheckStatus.Unauthenticated;
   late String code;
   UserEditStatus userEditStatus = UserEditStatus.Initial;
   // Future<void> login(email, password) async {
@@ -71,15 +77,13 @@ class AuthController extends GetxController {
     status = UserStatus.Authenticating;
     update();
     try {
-      dio.Response response = await registerApi(number);
+      final data = dio.FormData.fromMap({'username': number});
+      dio.Response response = await registerApi(data);
       final result = response.data;
+      print(result);
       if (result != null && result['success']) {
-        status = UserStatus.IsAuthenticated;
-        await u.sessionSaveUser(result['user']);
-
         await Get.to(() => const OtpScreen());
       } else {
-        status = UserStatus.WrongCredentials;
         String errors = '';
         if (result.containsKey('errors') && result['errors'].isNotEmpty) {
           result['errors'].forEach((key, value) {
@@ -91,9 +95,10 @@ class AuthController extends GetxController {
         errorAlert(errors);
       }
     } catch (error) {
+      log(error.toString());
       errorAlert(error);
-      status = UserStatus.WrongCredentials;
     } finally {
+      status = UserStatus.IsAuthenticated;
       update();
     }
   }
@@ -142,26 +147,28 @@ class AuthController extends GetxController {
   // }
 
   Future<void> checkConfirmationCode(cod) async {
-    loadingRecovery = true;
+    checkStatus = CheckStatus.Authenticating;
     update();
 
     try {
-      dio.Response response = await checkConfirmationCodeApi(cod);
+      log('result1');
+      final data = {'code': cod};
+      dio.Response response = await checkConfirmationCodeApi(data);
       final result = response.data;
+      log('result2');
       if (!result['success']) {
-        status = UserStatus.WrongCredentials;
         errorAlert(result['errors']['code']);
       } else {
+        await u.sessionSaveUser(response.data['user']);
         dio.Response response2 = await loginApi();
         await u.sessionSaveUser(response2.data);
         code = cod;
-        status = UserStatus.IsAuthenticated;
         Get.offAll(() => SellerScreen(), binding: AuthBinding());
       }
     } catch (error) {
       errorAlert(error);
     } finally {
-      loadingRecovery = false;
+      checkStatus = CheckStatus.IsAuthenticated;
       update();
     }
   }
