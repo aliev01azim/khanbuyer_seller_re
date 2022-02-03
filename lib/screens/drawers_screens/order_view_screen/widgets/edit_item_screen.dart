@@ -101,16 +101,9 @@ class _RowItemState extends State<RowItem> {
               flex: 1,
               child: GetBuilder<OrdersController>(
                 builder: (_) {
-                  // final orderIndex =
-                  //     _.orderDetails['grouped'].values.toList().indexOf(widget.o);
-                  // final coloIndex = widget.o.indexOf(widget.c);
-                  // final color = _.orderDetails['grouped'].values
-                  //     .toList()[orderIndex][coloIndex];
                   final bool loading =
-                      _.editItemStatus == EditItemStatus.Loading
-                      // &&
-                      //     color['id'] == widget.c['id']
-                      ;
+                      _.editItemStatus == EditItemStatus.Loading &&
+                          _.colorId == widget.c['id'];
                   return IconButton(
                     onPressed: quantity != widget.c['quantity_in_fact']
                         ? () async => _.editOrderItem(

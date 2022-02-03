@@ -18,6 +18,7 @@ class OrdersController extends GetxController {
   Map _orderDetails = {};
   int _orderId = 0;
   Map _processStatuses = {};
+  int _colorId = 0;
   OrdersStatus _ordersStatus = OrdersStatus.Initial;
   EditOrderStatus _editOrderStatus = EditOrderStatus.Initial;
   EditItemStatus _editItemStatus = EditItemStatus.Initial;
@@ -26,6 +27,7 @@ class OrdersController extends GetxController {
   int get orderId => _orderId;
   Map get orderDetails => _orderDetails;
   Map get processStatuses => _processStatuses;
+  int get colorId => _colorId;
   OrdersStatus get ordersStatus => _ordersStatus;
   EditOrderStatus get editOrderStatus => _editOrderStatus;
   EditItemStatus get editItemStatus => _editItemStatus;
@@ -86,6 +88,7 @@ class OrdersController extends GetxController {
   Future<void> editOrderItem(id, quantity, prodId) async {
     // print(_orderDetails['grouped'][prodId][orderIndex]['quantity_in_fact']);
     _editItemStatus = EditItemStatus.Loading;
+    _colorId = id;
     update();
     try {
       final Map data = {

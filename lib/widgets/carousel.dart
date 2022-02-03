@@ -84,7 +84,7 @@ class _CarouselState extends State<Carousel> {
                   return Positioned(
                     top: 10,
                     right: 20,
-                    child: _.removingImageLoading
+                    child: _.removingImageLoading && _.imageId == item['id']
                         ? Container(
                             padding: const EdgeInsets.all(3),
                             width: 25,

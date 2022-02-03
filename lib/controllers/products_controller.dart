@@ -325,9 +325,12 @@ class ProductsController extends GetxController {
   }
 
   bool _removing = false;
+  int _imageId = 0;
   bool get removingImageLoading => _removing;
+  int get imageId => _imageId;
   Future<bool> removeColorImage(imageId, productId, colorId) async {
     _removing = true;
+    _imageId = imageId;
     update();
     try {
       Map data = {

@@ -167,7 +167,8 @@ class EditingImagePicker extends StatelessWidget {
                                             return Positioned(
                                               top: 2,
                                               right: 2,
-                                              child: _.removingImageLoading
+                                              child: _.removingImageLoading &&
+                                                      _.imageId == image['id']
                                                   ? Container(
                                                       padding:
                                                           const EdgeInsets.all(
